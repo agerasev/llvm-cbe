@@ -42,12 +42,6 @@
 #endif
 // End Modification
 
-// Some ms header decided to define setjmp as _setjmp, undo this for this file
-// since we don't need it
-#ifdef setjmp
-#undef setjmp
-#endif
-
 namespace llvm_opencl {
 
 using namespace llvm;
@@ -1207,7 +1201,7 @@ std::string CWriter::GetValueName(Value *Operand) {
 
   // Mangle globals with the standard mangler interface for LLC compatibility.
   if (isa<GlobalValue>(Operand)) {
-    switch (builtins.findMangled(Name.data(), nullptr)) {
+    switch (Builtins.findMangled(Name.data(), nullptr)) {
     case -1:
       errorWithMessage("Built-in check unexpected error");
     case 0:
@@ -1507,6 +1501,9 @@ bool CWriter::doInitialization(Module &M) {
   TAsm = new CBEMCAsmInfo();
   MRI = new MCRegisterInfo();
   TCtx = new MCContext(TAsm, MRI, nullptr);
+
+  ASResolver.resolve(M);
+
   return false;
 }
 
@@ -1611,7 +1608,7 @@ void CWriter::generateHeader(Module &M) {
 
     // Skip OpenCL built-in functions
     Func demangled;
-    switch (builtins.findMangled(I->getName().data(), &demangled)) {
+    switch (Builtins.findMangled(I->getName().data(), &demangled)) {
     case -1:
       errorWithMessage("Built-in check unexpected error");
       break;
@@ -1623,7 +1620,7 @@ void CWriter::generateHeader(Module &M) {
       printFunctionProto(Out, I->getFunctionType(),
                         std::make_pair(I->getAttributes(), I->getCallingConv()),
                         GetValueName(&*I), &args);
-      Out << " {\n  " << builtins.getDef(
+      Out << " {\n  " << Builtins.getDef(
         demangled,
         &*I,
         [this](Value *Operand) { return this->GetValueName(Operand); },

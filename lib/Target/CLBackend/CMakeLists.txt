@@ -19,6 +19,7 @@ add_llvm_target(CLBackendCodeGen
   TopologicalSorter.cpp
   CLBuiltIns.cpp
   StringTools.cpp
+  AddrspaceResolver.cpp
   )
 
 #set_source_files_properties(CLBackend.cpp PROPERTIES COMPILE_FLAGS -g)

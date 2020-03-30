@@ -36,6 +36,7 @@
 
 #include "IDMap.h"
 #include "CLBuiltIns.h"
+#include "AddrspaceResolver.h"
 
 namespace llvm_opencl {
 
@@ -95,7 +96,8 @@ class CWriter : public FunctionPass, public InstVisitor<CWriter> {
     bool BitCastUnion : 1;
   } UsedHeaders;
 
-  CLBuiltIns builtins;
+  CLBuiltIns Builtins;
+  AddrspaceResolver ASResolver;
 
 #define USED_HEADERS_FLAG(Name)                                                \
   void headerUse##Name() { UsedHeaders.Name = true; }                          \
